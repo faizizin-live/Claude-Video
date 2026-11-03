@@ -1,6 +1,6 @@
 # Velfire Drive Out — Remotion edit (TikTok / IG Reels)
 
-9:16 (1080×1920, 30fps, 25.3s) edit of `Velfire drive out.mp4` built with [Remotion](https://remotion.dev).
+9:16 (1080×1920, 30fps, 30s) edit of `Velfire drive out.mp4` built with [Remotion](https://remotion.dev).
 
 ## Pipeline
 1. **Transcribe** – `scripts/transcribe.py` (faster-whisper `large-v3`, Malay). The clip is mostly ambient
@@ -22,7 +22,19 @@
 | 9.4s | flash → "👋 LAMBAI DULU!" sticker | whoosh, pop |
 | 11.0–12.6s | emoji burst + caption **BYE ANIS!** | sparkle, pop ×2 |
 | 15.4s | speed lines + "🛣️ OTW JALAN-JALAN" | whoosh, pop |
-| 20.5s→end | flash → "SELAMAT JALAN!" end card, fade out | whoosh, bass hit, sparkle, ding |
+| 21.0s | car leaves the gate → "👀 EH, TUNGGU JAP..." | whoosh, pop |
+| 23.0–24.4s | car glows; footage freezes at 23.5s, car cut-out charges up with sparks + "TRANSFORM!" | riser, zaps, bass hit |
+| 24.4s | white flash → street floods, the Velfire becomes a speedboat + splash | bass hit, splash, sea ambience |
+| 24.9–26.3s | "🚤 MODE SPEEDBOAT!" – boat bobs, engine idles | boat engine idle |
+| 26.3–29.0s | boat throttles away to the horizon with wake + rooster-tail spray | engine rev, whoosh, splash |
+| 27.6s→end | "SELAMAT JALAN! / Hati-hati di laut 🌊" end card, fade out | sparkle, ding |
+
+## Car → speedboat VFX
+- `scripts/make_vfx_plates.py` grabs the freeze frame (frame 705), cuts the car out with `rembg`
+  and inpaints a clean plate → `public/vfx/{freeze.jpg, car-cutout.png, clean-plate.jpg}`.
+- `src/transform/` – timeline/beat constants, the original SVG speedboat (rear view, Velfire name +
+  plate), animated water with shore reflection, wake, spray particles, splash, and the glitch title.
+- The water rises to the horizon (y=845) so the whole car area and the inpainted region are covered.
 
 ## Commands
 ```bash

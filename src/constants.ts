@@ -1,8 +1,8 @@
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
-// Source clip is 25.33s
-export const DURATION_IN_FRAMES = 760;
+// Source clip is 25.33s; we freeze at 23.5s and extend with the speedboat VFX to 30s
+export const DURATION_IN_FRAMES = 900;
 
 /**
  * Combined TikTok + Instagram Reels safe zone for a 1080x1920 canvas.

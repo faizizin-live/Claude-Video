@@ -110,6 +110,74 @@ def click(d=0.05):
     return (rng.standard_normal(len(x)) * 0.5 + np.sin(2 * np.pi * 3000 * x)) * np.exp(-x * 200)
 
 
+def riser(d=1.7):
+    """Rising synth + noise sweep that peaks at the end (transform charge-up)."""
+    x = t(d)
+    p = x / d
+    f = 180 * (2 ** (p * 3.2))
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    tone = np.sin(ph) + 0.4 * np.sin(2 * ph) + 0.25 * np.sin(1.5 * ph)
+    noise = bandpass(rng.standard_normal(len(x)), 400 + 6000 * p ** 2)
+    trem = 0.75 + 0.25 * np.sin(2 * np.pi * (6 + 20 * p) * x)
+    return (tone * 0.6 + noise * 1.4) * trem * p ** 1.8 * env(len(x), 0.01, 0.03)
+
+
+def zap(d=0.9):
+    """Crackling electric sparks."""
+    x = t(d)
+    out = np.zeros(len(x))
+    for _ in range(26):
+        st = int(rng.uniform(0, d - 0.06) * SR)
+        n = int(rng.uniform(0.01, 0.05) * SR)
+        f = rng.uniform(900, 3500)
+        burst = np.sign(np.sin(2 * np.pi * f * np.arange(n) / SR)) * rng.standard_normal(n) * np.exp(-np.arange(n) / n * 4)
+        out[st:st + n] += burst * rng.uniform(0.3, 1)
+    return out * env(len(x), 0.01, 0.2)
+
+
+def splash(d=1.4):
+    """Big water splash: noisy burst + bubbly tail."""
+    x = t(d)
+    n = rng.standard_normal(len(x))
+    body = onepole_lp(n, 2500 * np.exp(-x * 2.5) + 300) * np.exp(-x * 4)
+    hiss = (n - onepole_lp(n, 3000)) * np.exp(-x * 6) * 0.6
+    bubbles = np.zeros(len(x))
+    for _ in range(40):
+        st = int(rng.uniform(0.05, d - 0.1) * SR)
+        bt = np.arange(int(0.04 * SR)) / SR
+        f0 = rng.uniform(400, 1400)
+        b = np.sin(2 * np.pi * (f0 + 3000 * bt) * bt) * np.exp(-bt * 90)
+        bubbles[st:st + len(b)] += b * 0.25 * np.exp(-st / SR * 2)
+    thump = np.sin(2 * np.pi * (60 + 80 * np.exp(-x * 20)) * x) * np.exp(-x * 9) * 0.8
+    return (body * 1.6 + hiss + bubbles + thump) * env(len(x), 0.002, 0.3)
+
+
+def boat_engine(d=5.0):
+    """Outboard engine: idle, throttle up, then fades into the distance."""
+    x = t(d)
+    p = x / d
+    # rpm curve: idle (0-1.3s) -> rev (1.3-2.2s) -> high + slight doppler drop
+    idle = 38 + 3 * np.sin(2 * np.pi * 1.5 * x)
+    rev = np.interp(x, [0, 1.3, 2.2, 3.0, d], [0, 0, 105, 112, 92])
+    f = idle + rev
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    saw = 2 * ((ph / (2 * np.pi)) % 1) - 1
+    s = saw * 0.7 + np.sign(np.sin(2 * ph)) * 0.25 + np.sin(4 * ph) * 0.2
+    s = onepole_lp(s, 600 + 9 * f)
+    water = bandpass(rng.standard_normal(len(x)), 900) * np.interp(x, [0, 1.3, 2.2, d], [0.15, 0.2, 0.9, 0.4])
+    vol = np.interp(x, [0, 0.2, 1.3, 2.2, 3.2, d], [0, 0.55, 0.55, 1.0, 0.8, 0.0])
+    return (s + water) * vol
+
+
+def sea_ambience(d=6.0):
+    """Gentle lapping water."""
+    x = t(d)
+    n = rng.standard_normal(len(x))
+    swell = 0.55 + 0.45 * np.sin(2 * np.pi * 0.45 * x) ** 2
+    lap = onepole_lp(n, 700) * swell + (n - onepole_lp(n, 4000)) * 0.08 * swell
+    return lap * env(len(x), 0.5, 1.0, 1.5)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     save("whoosh.wav", whoosh())
@@ -120,3 +188,8 @@ if __name__ == "__main__":
     save("sparkle.wav", sparkle(), 0.6)
     save("engine-rev.wav", engine_rev())
     save("click.wav", click(), 0.5)
+    save("riser.wav", riser(), 0.8)
+    save("zap.wav", zap(), 0.6)
+    save("splash.wav", splash(), 0.95)
+    save("boat-engine.wav", boat_engine(), 0.9)
+    save("sea-ambience.wav", sea_ambience(), 0.6)

@@ -3,7 +3,7 @@ import { COLORS, SAFE_BOX } from "../constants";
 import { anton, EMOJI, montserrat } from "../fonts";
 
 /** Closing title in the upper-middle of the safe zone (the car is at the bottom of frame). */
-export const EndCard: React.FC = () => {
+export const EndCard: React.FC<{ subtitle?: string; emoji?: string }> = ({ subtitle = "Hati-hati di jalan", emoji = "🤲" }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const a = spring({ frame, fps, config: { damping: 11, stiffness: 150 } });
@@ -57,7 +57,7 @@ export const EndCard: React.FC = () => {
           transform: `translateY(${(1 - c) * 40}px)`,
         }}
       >
-        Hati-hati di jalan <span style={{ fontFamily: EMOJI }}>🤲</span>
+        {subtitle} <span style={{ fontFamily: EMOJI }}>{emoji}</span>
       </div>
     </div>
   );
