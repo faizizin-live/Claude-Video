@@ -1,0 +1,15 @@
+{
+  "_note": "Auto-transcribed with faster-whisper large-v3 (ms). Clip is mostly ambient sound; only one short utterance detected (~11.3s-12.5s). Edit words/timings here if needed - captions update automatically.",
+  "language": "ms",
+  "segments": [
+    {
+      "start": 11.3,
+      "end": 12.6,
+      "text": "Bye, Anis!",
+      "words": [
+        { "w": "BYE", "s": 11.3, "e": 11.75 },
+        { "w": "ANIS!", "s": 11.75, "e": 12.6 }
+      ]
+    }
+  ]
+}

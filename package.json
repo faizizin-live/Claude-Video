@@ -1,0 +1,22 @@
+{
+  "name": "velfire-drive-out",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remotion edit: Velfire drive out (TikTok / IG Reels 9:16)",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render VelfireDriveOut out/velfire-drive-out.mp4",
+    "render:guides": "remotion render VelfireDriveOut out/velfire-safezone-preview.mp4 --props='{\"showSafeZone\":true}'",
+    "sfx": "python3 scripts/gen_sfx.py"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.540",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.540"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}
