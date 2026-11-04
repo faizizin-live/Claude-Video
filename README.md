@@ -45,3 +45,49 @@ npm run render:guides   # same, with the safe-zone overlay drawn
 npm run sfx             # regenerate sound effects
 ```
 Fonts (Montserrat, Anton – SIL OFL) are bundled in `public/fonts` so renders work offline.
+
+---
+
+# Reading msg from Ahso — Remotion edit (TikTok / IG Reels)
+
+9:16 (1080×1920, 30fps, 75.5s) edit of `reading msg from ahso.mp4` → composition **`ReadingMsgAhso`** (`src/ahso/`).
+Source is transcoded to `public/ahso.mp4` (30fps, loudness-normalised to −16 LUFS, light denoise). The first 3.5s
+(near-silence) is trimmed via `TRIM_START` in `src/ahso/timeline.ts`.
+
+## Transcript
+faster-whisper `large-v3`, auto language (English message read aloud + Malay conversation), word timestamps →
+`src/ahso/transcript.json` (times in **source** seconds). Manual fixes: "Camel hangat" → **Comel sangat**,
+"Kelak" → **Kelakar**. One unclear word after "I too am" (Whisper: "selenzu") is shown as **…** — edit the `w` field to fix.
+
+## Motion graphics
+- **Chat card** (`MessageCard.tsx`): the message from Ahso appears sentence-by-sentence in a chat bubble with
+  karaoke word highlight + read-progress bar; sits on the bottom safe edge so it never covers his face.
+- **Word-pop captions** (`Captions.tsx`) for the spoken Malay lines, ≤5 words per page.
+- Hook title, stickers (CEPAT SEMBUH, TERHARU, ALHAMDULILLAH, TUDUNG TUALA, YAYA), emoji bursts,
+  "Makan / Puasa" poll card, punch-in zooms, flash on the camera swing, warm grade → bright grade, end card.
+
+## Sound
+Original audio + SFX (`SFX` array in `ReadingMsgAhso.tsx`) + two procedurally generated music beds
+(`pad-bed.wav` under the message, `bouncy-bed.wav` for the fun part). New SFX: notif, typing, boing, heart.
+
+| Source time | Visual | SFX |
+|---|---|---|
+| 3.5–6.6s | "BACA MESEJ / DARI AHSO 💌" hook | whoosh, pop |
+| 3.9s | chat card slides in, typing dots | notif chime, typing |
+| 8.2 / 11.2s | 💕 / ✨ emoji bursts | heart, sparkle |
+| 14.7s | 💪 CEPAT SEMBUH! + punch zoom | pop, whoosh |
+| 31.3s | 🥹 TERHARU... | pop |
+| 37.5s | 🤲 ALHAMDULILLAH + burst | sparkle, pop |
+| 40.7s | card exits, caption THANK YOU | whoosh, ding |
+| 51.9s | flash, camera swings to Yaya, music switches | whoosh |
+| 53.6s | 🧕 TUDUNG TUALA | boing, pop |
+| 56.1s | COMEL SANGAT + 🥰 burst | sparkle, heart |
+| 62.6–70.9s | MAKAN vs PUASA poll | pop, clicks |
+| 67.4s | 👧 YAYA tag | pop |
+| 73.4s | KELAKAR JE BUNYI + 🤣 burst | boing, pop |
+| 75.2s→end | "TERIMA KASIH AHSO 💛 / Doakan cepat sembuh 🤲" | sparkle, ding |
+
+```bash
+npm run render:ahso          # -> out/reading-msg-ahso.mp4
+npm run render:ahso:guides   # with the safe-zone overlay
+```

@@ -7,7 +7,9 @@
     "studio": "remotion studio",
     "render": "remotion render VelfireDriveOut out/velfire-drive-out.mp4",
     "render:guides": "remotion render VelfireDriveOut out/velfire-safezone-preview.mp4 --props='{\"showSafeZone\":true}'",
-    "sfx": "python3 scripts/gen_sfx.py"
+    "sfx": "python3 scripts/gen_sfx.py",
+    "render:ahso": "remotion render ReadingMsgAhso out/reading-msg-ahso.mp4",
+    "render:ahso:guides": "remotion render ReadingMsgAhso out/reading-msg-ahso-safezone.mp4 --props='{\"showSafeZone\":true}'"
   },
   "dependencies": {
     "@remotion/cli": "4.0.540",

@@ -178,6 +178,116 @@ def sea_ambience(d=6.0):
     return lap * env(len(x), 0.5, 1.0, 1.5)
 
 
+# ---- extra SFX for "reading msg from ahso" ----
+
+def notif(d=0.9):
+    """Two-note message-received chime."""
+    out = np.zeros(int(SR * d))
+    for st, f in [(0.0, 1046.5), (0.12, 1568.0)]:
+        tone = ding(0.7, f)
+        i = int(SR * st)
+        out[i:i + len(tone)] += tone[: len(out) - i]
+    return out
+
+
+def typing(d=1.6, rate=11):
+    """Soft phone-keyboard taps."""
+    out = np.zeros(int(SR * d))
+    k = 0
+    pos = 0.0
+    while pos < d - 0.05:
+        c = click(0.03) * rng.uniform(0.5, 1.0)
+        c = onepole_lp(c, rng.uniform(2500, 4500))
+        i = int(SR * pos)
+        out[i:i + len(c)] += c[: len(out) - i]
+        pos += 1 / rate * rng.uniform(0.6, 1.5)
+        k += 1
+    return out
+
+
+def boing(d=0.7):
+    """Comedy spring boing."""
+    x = t(d)
+    f = 220 + 160 * np.sin(2 * np.pi * 9 * x) * np.exp(-x * 4) + 120 * np.exp(-x * 6)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    return (np.sin(ph) + 0.3 * np.sin(2 * ph)) * np.exp(-x * 3.5) * env(len(x), 0.004, 0.1)
+
+
+def heart(d=0.35):
+    """Rising bubbly 'bloop'."""
+    x = t(d)
+    f = 400 + 900 * (x / d) ** 0.6
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    return np.sin(ph) * np.sin(np.pi * x / d) ** 2
+
+
+def _midi(n):
+    return 440.0 * 2 ** ((n - 69) / 12)
+
+
+def pad_bed(d=40.0, bpm=70):
+    """Warm, slow synth pad (Cmaj7 - Am7 - Fmaj7 - G6) for the heartfelt part."""
+    chords = [[48, 55, 64, 71], [45, 52, 60, 67], [41, 53, 57, 64], [43, 55, 59, 64]]
+    bar = 4 * 60 / bpm
+    out = np.zeros(int(SR * d))
+    pos, k = 0.0, 0
+    while pos < d:
+        n = int(SR * (bar + 1.5))
+        x = np.arange(n) / SR
+        chord = np.zeros(n)
+        for m in chords[k % 4]:
+            f = _midi(m)
+            for det in (-0.12, 0.12):
+                chord += np.sin(2 * np.pi * f * (1 + det / 100) * x + rng.uniform(0, 6.28))
+        e = np.clip(x / 1.2, 0, 1) * np.clip((bar + 1.5 - x) / 1.5, 0, 1)
+        i = int(SR * pos)
+        seg = chord * e
+        j = min(len(out), i + n)
+        out[i:j] += seg[: j - i]
+        pos += bar
+        k += 1
+    out = onepole_lp(out, 1400)
+    return out * env(len(out), 2.0, 3.0, 1.5)
+
+
+def pluck(f, d=0.45):
+    """Karplus-Strong pluck (ukulele-ish)."""
+    n = int(SR * d)
+    p = max(2, int(SR / f))
+    buf = rng.uniform(-1, 1, p)
+    out = np.zeros(n)
+    for i in range(n):
+        out[i] = buf[i % p]
+        buf[i % p] = 0.5 * (buf[i % p] + buf[(i + 1) % p]) * 0.996
+    return out
+
+
+def bouncy_bed(d=30.0, bpm=112):
+    """Playful plucked loop (C - Am - F - G) for the funny part."""
+    prog = [[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]]
+    pattern = [0, 2, 1, 2, 0, 2, 1, 2]  # eighth-note arpeggio
+    step = 60 / bpm / 2
+    out = np.zeros(int(SR * d))
+    cache = {}
+    pos, k = 0.0, 0
+    while pos < d:
+        chord = prog[(k // 8) % 4]
+        note = chord[pattern[k % 8]] + (12 if k % 8 == 3 else 0)
+        if note not in cache:
+            cache[note] = pluck(_midi(note))
+        s = cache[note] * (1.0 if k % 2 == 0 else 0.7)
+        i = int(SR * pos)
+        j = min(len(out), i + len(s))
+        out[i:j] += s[: j - i]
+        if k % 8 == 0:  # bass on the bar
+            b = pluck(_midi(chord[0] - 24), 0.9) * 0.9
+            j = min(len(out), i + len(b))
+            out[i:j] += b[: j - i]
+        pos += step
+        k += 1
+    return out * env(len(out), 0.05, 2.0, 1.5)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     save("whoosh.wav", whoosh())
@@ -193,3 +303,10 @@ if __name__ == "__main__":
     save("splash.wav", splash(), 0.95)
     save("boat-engine.wav", boat_engine(), 0.9)
     save("sea-ambience.wav", sea_ambience(), 0.6)
+    # reading msg from ahso
+    save("notif.wav", notif(), 0.6)
+    save("typing.wav", typing(), 0.5)
+    save("boing.wav", boing(), 0.7)
+    save("heart.wav", heart(), 0.6)
+    save("pad-bed.wav", pad_bed(), 0.5)
+    save("bouncy-bed.wav", bouncy_bed(), 0.6)
